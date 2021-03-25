@@ -34,6 +34,8 @@ fn main() -> Res<()> {
         } else if let Value::String(val) = &v[key] {
             println!("Value [{}] copied to clipboard", val);
             clipboard::write(val.to_owned())?;
+        } else {
+            println!("Could not find value key provided!");
         }
     }
 

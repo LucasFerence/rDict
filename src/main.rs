@@ -1,14 +1,15 @@
-use serde_json::{Result, Value};
+use serde_json::Value;
 use clap::App;
 
 use rdict::file;
 use rdict::arg::{Function, Key, Insert};
 use rdict::clipboard;
+use rdict::Res;
 
 /// Known bugs
 /// 1. If there is no file or a file with no brackets, it will not write
 /// 
-fn main() -> Result<()> {
+fn main() -> Res<()> {
     // Construct the app with valid arguments
     let app = App::new("rdict")
         .version("0.1")
@@ -32,7 +33,7 @@ fn main() -> Result<()> {
             file::write_map(map)?;
         } else if let Value::String(val) = &v[key] {
             println!("Value [{}] copied to clipboard", val);
-            clipboard::write(val.to_owned());
+            clipboard::write(val.to_owned())?;
         }
     }
 

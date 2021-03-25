@@ -3,6 +3,7 @@ use clap::App;
 
 use rdict::file;
 use rdict::arg::{Function, Key, Insert};
+use rdict::clipboard;
 
 /// Known bugs
 /// 1. If there is no file or a file with no brackets, it will not write
@@ -29,9 +30,9 @@ fn main() -> Result<()> {
 
             // Propogate error if existant
             file::write_map(map)?;
-        } else {
-            // Otherwise, just print what's at the location
-            println!("{:?}", v[key]);
+        } else if let Value::String(val) = &v[key] {
+            println!("Value [{}] copied to clipboard", val);
+            clipboard::write(val.to_owned());
         }
     }
 

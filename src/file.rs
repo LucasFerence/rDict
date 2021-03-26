@@ -1,24 +1,29 @@
-use std::path::Path;
-use std::fs::File;
+use std::path::{Path, PathBuf};
+use std::fs::{File, create_dir};
 
 use serde_json::{Map, Value};
+use directories::BaseDirs;
 
 use crate::Res;
+use crate::APP_NAME;
 
-const PATH: &str = "/Users/lucas/Development/rdict/data/dict.json";
+const FILE_NAME: &str = "data.json";
 
 // Read from the file, return raw value
-pub fn read_value() -> Res<Value> {
-    let json_file_path = Path::new(PATH);
-
+pub fn read_value(path: &Path) -> Res<Value> {
     let val;
+    let file_path = path.join(FILE_NAME);
 
-    if json_file_path.exists() {
-        let file = File::open(json_file_path)?;
+    if file_path.exists() {
+        println!("Found file... reading");
+
+        let file = File::open(file_path)?;
         val = serde_json::from_reader(file)?;
     } else {
+        println!("Creating new file at {:?}", file_path);
+
         let map = Map::new();
-        write_map(&map)?;
+        write_map(&map, path)?;
         val = Value::Object(map);
     }  
     
@@ -26,11 +31,26 @@ pub fn read_value() -> Res<Value> {
 }
 
 // Writes serializeable map to file
-pub fn write_map(val: &Map<String, Value>) -> Res<()> {
-    let json_file_path = Path::new(PATH);
-    let file = File::create(json_file_path)?;
+pub fn write_map(val: &Map<String, Value>, path: &Path) -> Res<()> {
+    let file_path = path.join(FILE_NAME);
+    let file = File::create(file_path)?;
 
     serde_json::to_writer_pretty(file, val)?;
 
     Ok(())
+}
+
+// Ensure the correct directories are in place
+pub fn get_data_dir() -> Res<PathBuf> {
+    if let Some(base) = BaseDirs::new() {
+        let data_dir = base.data_dir().join(APP_NAME);
+
+        if !data_dir.exists() {
+            create_dir(&data_dir)?;
+        }
+
+        Ok(data_dir)
+    } else {
+        Err(Box::from("Could not create directory"))
+    }
 }

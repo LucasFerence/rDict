@@ -11,19 +11,24 @@ const PATH: &str = "/Users/lucas/Development/rdict/data/dict.json";
 pub fn read_value() -> Res<Value> {
     let json_file_path = Path::new(PATH);
 
-    // Probably okay to expect here for now
-    let file = File::open(json_file_path).expect("File not found");
+    let val;
 
-    let val = serde_json::from_reader(file)?;
-
+    if json_file_path.exists() {
+        let file = File::open(json_file_path)?;
+        val = serde_json::from_reader(file)?;
+    } else {
+        let map = Map::new();
+        write_map(&map)?;
+        val = Value::Object(map);
+    }  
+    
     Ok(val)
 }
 
 // Writes serializeable map to file
 pub fn write_map(val: &Map<String, Value>) -> Res<()> {
     let json_file_path = Path::new(PATH);
-    // Probably okay to expect here for now
-    let file = File::create(json_file_path).expect("File not found");
+    let file = File::create(json_file_path)?;
 
     serde_json::to_writer_pretty(file, val)?;
 

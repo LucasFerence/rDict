@@ -22,11 +22,11 @@ impl Function for Key {
     }
 }
 
-pub struct Insert;
+pub struct Val;
 
-impl Function for Insert {
+impl Function for Val {
     fn create() -> Arg<'static, 'static> {
-        Arg::with_name(Insert::name())
+        Arg::with_name(Val::name())
             .help("Value to insert for key")
             .index(2)
             .takes_value(true)

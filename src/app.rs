@@ -1,4 +1,12 @@
-use clap::Arg;
+use clap::{App, Arg, crate_name, crate_authors, crate_version};
+
+pub fn app() -> App<'static, 'static> {
+    App::new(crate_name!())
+        .version(crate_version!())
+        .author(crate_authors!())
+        .arg(Key::create())
+        .arg(Val::create())
+}
 
 // Provides default functionality for an argument
 pub trait Function {

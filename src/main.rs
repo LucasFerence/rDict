@@ -22,12 +22,10 @@ fn try_main() -> Res<()> {
     let file_access = FileAccess::new();
 
     if matches.occurrences_of(Show::name()) > 0 {
-        if let Ok(v) = file_access.read() {
-            if let Some(map) = v.as_object() {
-                for mapping in map.iter() {
-                    println!("{:?}", mapping);
-                }
-            }            
+        if let Some(file_map) = file_access.read()?.as_object() {
+            for mapping in file_map.iter() {
+                println!("{:?}", mapping);
+            }
         }
     } else if let (Some(key), Ok(mut v)) = (matches.value_of(Key::name()), file_access.read()) {
         

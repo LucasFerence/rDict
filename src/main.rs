@@ -3,7 +3,7 @@ use std::process;
 use serde_json::Value;
 
 use rdict::file::FileAccess;
-use rdict::app::{self, Function, Key, Val};
+use rdict::app::{self, Function, Key, Val, Show};
 use rdict::clipboard;
 use rdict::Res;
 
@@ -21,8 +21,15 @@ fn try_main() -> Res<()> {
     let matches = app::app().get_matches();
     let file_access = FileAccess::new();
 
-    // If we have the key and a valid file, continue
-    if let (Some(key), Ok(mut v)) = (matches.value_of(Key::name()), file_access.read()) {
+    if matches.occurrences_of(Show::name()) > 0 {
+        if let Ok(v) = file_access.read() {
+            if let Some(map) = v.as_object() {
+                for mapping in map.iter() {
+                    println!("{:?}", mapping);
+                }
+            }            
+        }
+    } else if let (Some(key), Ok(mut v)) = (matches.value_of(Key::name()), file_access.read()) {
         
         // If we have a value/mutable map also, write value to map/file.
         if let (Some(value), Some(map)) = (matches.value_of(Val::name()), v.as_object_mut()) {

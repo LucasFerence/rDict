@@ -6,6 +6,7 @@ pub fn app() -> App<'static, 'static> {
         .author(crate_authors!())
         .arg(Key::create())
         .arg(Val::create())
+        .arg(Show::create())
 }
 
 // Provides default functionality for an argument
@@ -19,7 +20,7 @@ pub struct Key;
 
 impl Function for Key {
     fn create() -> Arg<'static, 'static> {
-        Arg::with_name(Key::name())
+        Arg::with_name(Self::name())
             .help("Key to lookup")
             .index(1)
             .takes_value(true)
@@ -34,7 +35,7 @@ pub struct Val;
 
 impl Function for Val {
     fn create() -> Arg<'static, 'static> {
-        Arg::with_name(Val::name())
+        Arg::with_name(Self::name())
             .help("Value to insert for key")
             .index(2)
             .takes_value(true)
@@ -42,5 +43,20 @@ impl Function for Val {
 
     fn name() -> &'static str {
         "insert"
+    }
+}
+
+pub struct Show;
+
+impl Function for Show {
+    
+    fn create() -> clap::Arg<'static, 'static> {
+        Arg::with_name(Self::name())
+            .help("Show all key/value mappings")
+            .long(Self::name())
+    }
+
+    fn name() -> &'static str {
+        "show"
     }
 }

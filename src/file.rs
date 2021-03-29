@@ -46,7 +46,7 @@ impl FileAccess {
 
                 return Ok(val)
             },
-            _ =>return Err(Box::from("No path!"))
+            _ => return Err(Box::from("No path!"))
         }
     }
 

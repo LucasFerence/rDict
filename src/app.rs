@@ -6,6 +6,7 @@ pub fn app() -> App<'static, 'static> {
         .author(crate_authors!())
         .arg(Key::create())
         .arg(Val::create())
+        .arg(Remove::create())
         .arg(Show::create())
 }
 
@@ -43,6 +44,20 @@ impl Function for Val {
 
     fn name() -> &'static str {
         "insert"
+    }
+}
+
+pub struct Remove;
+
+impl Function for Remove {
+    fn create() -> clap::Arg<'static, 'static> {
+        Arg::with_name(Self::name())
+            .help("Remove the key entered")
+            .long(Self::name())
+    }
+
+    fn name() -> &'static str {
+        "remove"
     }
 }
 

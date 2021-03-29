@@ -3,13 +3,10 @@ use std::process;
 use serde_json::Value;
 
 use rdict::file::FileAccess;
-use rdict::app::{self, Function, Key, Val, Show};
+use rdict::app::{self, Function, Key, Val, Remove, Show};
 use rdict::clipboard;
 use rdict::Res;
 
-/// Known bugs
-/// 1. If there is no file or a file with no brackets, it will not write
-/// 
 fn main() {
     if let Err(err) = try_main() {
         eprintln!("{}", err);
@@ -21,26 +18,40 @@ fn try_main() -> Res<()> {
     let matches = app::app().get_matches();
     let file_access = FileAccess::new();
 
+    // Read the file before doing anything
+    let mut file = file_access.read()?;
+
+    // Check for show flag
     if matches.occurrences_of(Show::name()) > 0 {
-        if let Some(file_map) = file_access.read()?.as_object() {
-            for mapping in file_map.iter() {
-                println!("{:?}", mapping);
-            }
+        let file_map = file.as_object().ok_or("Could not process immutable file")?;
+        for mapping in file_map {
+            println!("{:?}", mapping);
         }
-    } else if let (Some(key), Ok(mut v)) = (matches.value_of(Key::name()), file_access.read()) {
+    }
+
+    // Check for a key
+    if let Some(key) = matches.value_of(Key::name()) {
+        // Need the mutable map
+        let file_map = file.as_object_mut().ok_or("Could not process mutable file")?;
         
-        // If we have a value/mutable map also, write value to map/file.
-        if let (Some(value), Some(map)) = (matches.value_of(Val::name()), v.as_object_mut()) {
-            map.insert(
+        // Check to see if we wanna remove what is at the key
+        if matches.occurrences_of(Remove::name()) > 0 {
+            // Remove the key/value pair
+            file_map.remove(key);
+
+            file_access.write(file_map)?;
+            println!("Removed mapping for [{}]", key)
+        } else if let Some(value) = matches.value_of(Val::name()) {
+            // Insert the value for the key
+            file_map.insert(
                 String::from(key),
                 Value::String(String::from(value))
-            );  
+            );
 
-            // Propogate error if existant
-            file_access.write(map)?;
-
+            file_access.write(file_map)?;
             println!("Wrote value: [{}] for [{}]", value, key);
-        } else if let Value::String(val) = &v[key] {
+        } else if let Value::String(val) = &file[key] {
+            // Copy the key to the clipboard if not inserting
             clipboard::write(val.to_owned())?;
             println!("Value [{}] copied to clipboard", val);
         } else {

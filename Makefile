@@ -3,3 +3,5 @@ install:
 
 uninstall:
 	cargo uninstall --root /usr/local rdict
+
+reinstall: uninstall install
